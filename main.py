@@ -62,7 +62,7 @@ while True:
             #os.system(play_cmd)
 
             sound = barcode_json["sound"]
-            tts.play("{} for {}".format(sound[0].upper(), sound))
+            tts.play("{}; for {}".format(sound[0].upper(), sound.capitalize()))
 
         elif barcode_json["type"] == "wifi-config":
             wifi_config.update(barcode_json)
