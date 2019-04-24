@@ -16,6 +16,7 @@ import wifi_config
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--display", action="store_true", help="Whether or not frames should be displayed")
+ap.add_argument("-b", "--box", action="store_true", help="Display bounding boxes around QRCodes")
 
 args = vars(ap.parse_args())
 
@@ -35,16 +36,13 @@ while True:
         time.sleep(0)
         continue
 
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    if args["display"]:
-        cv2.imshow("frame", frame)
-        cv2.waitKey(1)
+    frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # find the barcodes in the frame and decode each of the barcodes
-    barcodes = pyzbar.decode(frame)
+    barcodes = pyzbar.decode(frame_grayscale)
 
     # loop over the detected barcodes
+    barcode_data_list = []
     for barcode in barcodes:
         # the barcode data is a bytes object so if we want to draw it
         # on our output image we need to convert it to a string first
@@ -53,10 +51,19 @@ while True:
 
         if barcodeType != "QRCODE":
             continue
+        else:
+            if args["box"]:
+                (x, y, w, h) = barcode.rect
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-        print(barcodeData)
-        barcode_json = json.loads(barcodeData)
+            barcode_json = json.loads(barcodeData)
+            barcode_data_list.append(barcode_json)
 
+    if args["display"]:
+        cv2.imshow("video", frame)
+        cv2.waitKey(1)
+
+    for barcode_json in barcode_data_list:
         if barcode_json["type"] == "word":
             #play_cmd = "aplay /home/pi/qrcode/pizerow/sounds/{0}.wav".format(barcode_json["sound"])
             #os.system(play_cmd)
