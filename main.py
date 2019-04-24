@@ -21,10 +21,7 @@ args = vars(ap.parse_args())
 
 # initialize the video stream and allow the camera sensor to warm up
 print("[INFO] starting video stream...")
-vs = VideoStream(usePiCamera=True, resolution=(240, 240))
-
-vs = vs.start()
-time.sleep(2.0)
+vs = VideoStream(usePiCamera=True, resolution=(240, 240)).start()
 
 start_time = time.time()
 
@@ -32,8 +29,13 @@ start_time = time.time()
 frame_ctr = 0
 while True:
     frame = vs.read()
-    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #frame = imutils.resize(frame, width=400)
+
+    # wait for video buffer
+    if frame is None:
+        time.sleep(0)
+        continue
+
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     if args["display"]:
         cv2.imshow("frame", frame)
