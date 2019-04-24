@@ -10,6 +10,7 @@ import cv2
 import os
 import time
 
+import tts
 import wifi_config
  
 # construct the argument parser and parse the arguments
@@ -55,13 +56,14 @@ while True:
         barcode_json = json.loads(barcodeData)
 
         if barcode_json["type"] == "word":
-            play_cmd = "aplay /home/pi/qrcode/pizerow/sounds/{0}.wav".format(barcode_json["sound"]) 
-            os.system(play_cmd)	
+            #play_cmd = "aplay /home/pi/qrcode/pizerow/sounds/{0}.wav".format(barcode_json["sound"])
+            #os.system(play_cmd)
+
+            sound = barcode_json["sound"]
+            tts.play("{} for {}".format(sound[0].upper(), sound))
 
         elif barcode_json["type"] == "wifi-config":
             wifi_config.update(barcode_json)
-
-        #time.sleep(0.35)
 
     frame_ctr += 1
     bench_freq = frame_ctr / (time.time() - start_time)
