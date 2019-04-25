@@ -55,12 +55,14 @@ while True:
             if args["box"]:
                 (x, y, w, h) = barcode.rect
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                cv2.rectangle(frame_grayscale, (x, y), (x + w, y + h), 127, 2)
 
             barcode_json = json.loads(barcodeData)
             barcode_data_list.append(barcode_json)
 
     if args["display"]:
-        cv2.imshow("video", frame)
+        cv2.imshow("video color", frame)
+        cv2.imshow("video grayscale", frame_grayscale)
         cv2.waitKey(1)
 
     for barcode_json in barcode_data_list:
