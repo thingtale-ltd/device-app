@@ -5,6 +5,7 @@ import argparse
 import datetime
 import imutils
 import json
+import numpy as np
 import time
 import cv2
 import os
@@ -17,6 +18,7 @@ import wifi_config
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--display", action="store_true", help="Whether or not frames should be displayed")
 ap.add_argument("-b", "--box", action="store_true", help="Display bounding boxes around QRCodes")
+ap.add_argument("--histogram", action="store_true", help="Display the luminance histogram")
 
 args = vars(ap.parse_args())
 
@@ -61,6 +63,31 @@ while True:
             barcode_data_list.append(barcode_json)
 
     if args["display"]:
+        if args["histogram"]:
+            nbins = 128
+            hist_height, hist_width =  40, 120
+            bin_width = int(float(hist_width) / float(nbins) * 2)
+
+            #Create an empty image for the histogram
+            hist_img = np.zeros((hist_height, hist_width))
+
+            #Create array for the bins
+            bins = np.arange(nbins, dtype=np.uint16).reshape(nbins, 1)
+
+            hist = cv2.calcHist([frame_grayscale], [0], None, [nbins], [0, 256])
+
+            #Loop through each bin and plot the rectangle in white
+            pts = np.column_stack((bins, hist))
+            for x, y in enumerate(hist):
+                cv2.rectangle(hist_img, (x*bin_width, y/hist_height), (x*bin_width + bin_width-1, hist_height), (255), -1)
+
+            #invert histogram (negative colors)
+            hist_img = 255 - hist_img
+
+            #insert historgram
+            h, w = frame_grayscale.shape
+            frame_grayscale[h-hist_height:frame_grayscale.shape[0], w-hist_width:frame_grayscale.shape[1]] = hist_img
+
         cv2.imshow("video color", frame)
         cv2.imshow("video grayscale", frame_grayscale)
         cv2.waitKey(1)
