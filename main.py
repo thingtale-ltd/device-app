@@ -55,9 +55,15 @@ while True:
             continue
         else:
             if args["box"]:
-                (x, y, w, h) = barcode.rect
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                cv2.rectangle(frame_grayscale, (x, y), (x + w, y + h), 127, 2)
+                points = np.ndarray((len(barcode.polygon), 2), np.int32)
+                for i, p in enumerate(barcode.polygon):
+                    points[i][0] = p.x
+                    points[i][1] = p.y
+
+                points = points.reshape((-1,1,2))
+
+                cv2.polylines(frame, [points], True, (0, 0, 255), thickness=3)
+                cv2.polylines(frame_grayscale, [points], True, 127, thickness=3)
 
             barcode_json = json.loads(barcodeData)
             barcode_data_list.append(barcode_json)
