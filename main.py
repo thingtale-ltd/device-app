@@ -11,6 +11,7 @@ import cv2
 import os
 import time
 
+import database
 import tts
 import wifi_config
  
@@ -25,6 +26,8 @@ args = vars(ap.parse_args())
 # initialize the video stream and allow the camera sensor to warm up
 print("[INFO] starting video stream...")
 vs = VideoStream(usePiCamera=True, resolution=(240, 240)).start()
+
+db = database.DB()
 
 start_time = time.time()
 
@@ -102,6 +105,8 @@ while True:
         if barcode_json["type"] == "word":
             #play_cmd = "aplay /home/pi/qrcode/pizerow/sounds/{0}.wav".format(barcode_json["sound"])
             #os.system(play_cmd)
+
+            db.insert_obj(barcodeData)
 
             sound = barcode_json["sound"]
             tts.play("{}; for {}".format(sound[0].upper(), sound.capitalize()))
